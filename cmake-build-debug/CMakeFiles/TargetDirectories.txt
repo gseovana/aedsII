@@ -1,0 +1,3 @@
+/home/geovana/CLionProjects/locadora/cmake-build-debug/CMakeFiles/locadora.dir
+/home/geovana/CLionProjects/locadora/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/geovana/CLionProjects/locadora/cmake-build-debug/CMakeFiles/rebuild_cache.dir
