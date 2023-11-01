@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include "locadora.c"
 /*
 1. (2 pontos) Implemente estruturas para representar as entidades que fazem parte da aplicação
 e crie bases de dados para estas entidades. As bases de dados devem ser criadas
@@ -22,6 +24,27 @@ aplicação.
 principais diferenças observadas entre os métodos*/
 
 int main() {
-    printf("Hello, World!\n");
-    return 0;
+
+    //CRIA UM PONTEIRO PARA TIPO FILE (ARQUIVO)
+    FILE *arq;
+    TFunc *f;
+
+    //CONDICIONAL DE TENTATIVA ABERTURA DO ARQUIVO
+    if ((arq = fopen("funcionario.dat", "w+b")) == NULL) {
+        printf("Erro ao abrir arquivo\n");
+        exit(1);
+    }
+
+    else{
+
+        criar_base_dvd(arq, 50);
+        //imprimirBase(arq);
+        //system("pause");
+        //f = buscaSequencial(10, arq);
+        //imprime(f);
+        //f = busca_binaria(10, arq, 0, tamanho_arquivo(arq)-1);
+        //imprime(f);
+        //free(f);
+    }
+
 }
