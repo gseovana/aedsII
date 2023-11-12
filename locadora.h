@@ -4,6 +4,8 @@
 
 #ifndef LOCADORA_LOCADORA_H
 #define LOCADORA_LOCADORA_H
+#include <stdbool.h>
+#include <stdio.h>
 
 typedef struct dvd_est {
     int id_dvd;
@@ -11,7 +13,7 @@ typedef struct dvd_est {
     int ano_lancamento;
     char diretor[50];
     char genero[100];
-    int estoque;
+    bool disponivel;
 } TDvd;
 
 typedef struct funcionario_est {
@@ -44,15 +46,24 @@ typedef struct transacao_est {
 
 TDvd *criar_DVD(int id_dvd, char *nome_dvd, int ano_lancamento, char *diretor, char *genero, int estoque);
 TFuncionario *criar_funcionario(int id_funcionario, char *nome_funcionario, char *cpf_funcionario, char *data_nascimentoF, char *telefone_funcionario, double salario);
-TDvd *criar_cliente(int id_cliente, char *nome_cliente, char *cpf_cliente, char *data_nascimentoC, char *telefone_cliente);
-TDvd *criar_transacao(int id_transacao, TCliente cliente, TDvd dvd, TFuncionario funcionario, char *data_locacao, char *data_devolucao, double multa);
+TCliente *criar_cliente(int id_cliente, char *nome_cliente, char *cpf_cliente, char *data_nascimentoC, char *telefone_cliente);
+TTransacao *criar_transacao(int id_transacao, TCliente cliente, TDvd dvd, TFuncionario funcionario, char *data_locacao, char *data_devolucao, double multa);
 
 void desordenar(int *vet,int MAX,int MIN);
 
 void salvar_dvd(TDvd *dvd, FILE *out);
-void salvar_funcionario(TDvd *dvd, FILE *out);
-void salvar_cliente(TDvd *dvd, FILE *out);
-void salvar_transacao(TDvd *dvd, FILE *out);
+void salvar_funcionario(TFuncionario *funcionario, FILE *out);
+void salvar_cliente(TCliente *cliente, FILE *out);
+void salvar_transacao(TTransacao *transacao, FILE *out);
+
+void criar_base_dvd(FILE *out, int tamanho);
+void criar_base_funcionario(FILE *out, int tamanho);
+void criar_base_cliente(FILE *out, int tamanho);
+void criar_base_transacao(FILE *out, int tamanho, TFuncionario funcionario, TDvd dvd, TCliente cliente);
+
+void imprimir_dvd(TDvd *dvd);
+void imprimir_base_dvd(FILE *out);
+
 
 
 #endif //LOCADORA_LOCADORA_H

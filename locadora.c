@@ -9,6 +9,8 @@
 #include <bits/types/FILE.h>
 #include <stdio.h>
 
+TDvd *ler_dvd(FILE *in);
+
 // ******************************** CRIA UM "OBJETO" FUNCIONARIO ************************************
 
 TFuncionario *criar_funcionario(int id_funcionario, char *nome_funcionario, char *cpf_funcionario, char *data_nascimentoF, char *telefone_funcionario, double salario) {
@@ -30,7 +32,7 @@ TFuncionario *criar_funcionario(int id_funcionario, char *nome_funcionario, char
 }
 // ******************************* CRIA UM "OBJETO" DVD ****************************************
 
-TDvd *criar_dvd(int id_dvd, char *nome_dvd, int ano_lancamento, char *diretor, char *genero, int estoque) {
+TDvd *criar_dvd(int id_dvd, char *nome_dvd, int ano_lancamento, char *diretor, char *genero, bool disponivel) {
     TDvd *dvd = (TDvd *) malloc(sizeof(TDvd));
 
     if (dvd) memset(dvd, 0, sizeof(TDvd));
@@ -40,13 +42,13 @@ TDvd *criar_dvd(int id_dvd, char *nome_dvd, int ano_lancamento, char *diretor, c
     dvd->ano_lancamento = ano_lancamento;
     strcpy(dvd->diretor, diretor);
     strcpy(dvd->genero, genero);
-    dvd->estoque = estoque;
+    dvd->disponivel = disponivel;
 
     return dvd;
 }
 // ******************************** CRIA UM "OBJETO" CLIENTE *******************************************
 
-TDvd *criar_cliente(int id_cliente, char *nome_cliente, char *cpf_cliente, char *data_nascimentoC, char *telefone_cliente) {
+TCliente *criar_cliente(int id_cliente, char *nome_cliente, char *cpf_cliente, char *data_nascimentoC, char *telefone_cliente) {
     TCliente *cliente = (TCliente *) malloc(sizeof(TCliente));
 
     if (cliente) memset(cliente, 0, sizeof(TCliente));
@@ -62,7 +64,7 @@ TDvd *criar_cliente(int id_cliente, char *nome_cliente, char *cpf_cliente, char 
 
 //****************************** CRIA UM "OBJETO" TRANSACAO ************************************
 
-TDvd *criar_transacao(int id_transacao, TCliente cliente, TDvd dvd, TFuncionario funcionario, char *data_locacao, char *data_devolucao, double multa) {
+TTransacao *criar_transacao(int id_transacao, TCliente cliente, TDvd dvd, TFuncionario funcionario, char *data_locacao, char *data_devolucao, double multa) {
     TTransacao *transacao = (TTransacao *) malloc(sizeof(TTransacao));
 
     if (transacao) memset(transacao, 0, sizeof(TTransacao));
@@ -84,7 +86,7 @@ void salvar_dvd(TDvd *dvd, FILE *out) {
     fwrite(&dvd->ano_lancamento, sizeof(int), 1, out);
     fwrite(dvd->diretor, sizeof(char), sizeof(dvd->diretor), out);
     fwrite(dvd->genero, sizeof(char), sizeof(dvd->genero), out);
-    fwrite(&dvd->estoque, sizeof(double), 1, out);
+    fwrite(&dvd->disponivel, sizeof(bool), 1, out);
 }
 
 // ***************************** SALVA FUNCIONARIO NO ARQUIVO *******************************
@@ -140,6 +142,7 @@ void criar_base_dvd(FILE *out, int tamanho){
     //CRIA UM VETOR DE TAMANHO 'TAMANHO'
     int vetor_dvd[tamanho];
     TDvd *dvd;
+    bool disponibilidade;
 
     //CRIA UM VETOR QUE VAI DE 1 ATÉ O TAMANHO (SERÁ USADO PARA EMBARALHAR OS IDs)
     for(int i=0;i<tamanho;i++)
@@ -148,14 +151,19 @@ void criar_base_dvd(FILE *out, int tamanho){
     //DESORDENA O VETOR CRIADO
     desordenar(vetor_dvd, tamanho, (tamanho*10)/100);
 
-    printf("\nGerando a base de dados...\n");
+    printf("\nGerando a base de dados de DVDs...\n");
 
      /* O id de cada "objeto" dvd vem do vetor_dvd que está com os números embaralhados. Assim os "objetos"
      estarão fora de ordem no arquivo.*/
 
     // PERCORRE O VETOR DVD CRIANDO ENTIDADES DE DVD E SALVANDO NELE
     for (int i=0;i<tamanho;i++){
-        dvd = criar_dvd(vetor_dvd[i], "As aventuras de Geovana e Talia", i+2000, "Diretor Fulano", "Genero Y", 3*2+i);
+        if(i%2==0) {
+            disponibilidade = false;
+        } else{
+            disponibilidade = true;
+        }
+        dvd = criar_dvd(vetor_dvd[i], "As aventuras de Geovana e Talia", i+2000, "Diretor Fulano", "Genero Y", disponibilidade);
         salvar_dvd(dvd, out);
     }
 
@@ -174,7 +182,7 @@ void criar_base_funcionario(FILE *out, int tamanho){
 
     desordenar(vetor_funcionario, tamanho, (tamanho*10)/100);
 
-    printf("\nGerando a base de dados...\n");
+    printf("\nGerando a base de dados de funcionários...\n");
 
     for (int i=0;i<tamanho;i++){
         funcionario = criar_funcionario(vetor_funcionario[i], "Funcionario A", "000.000.000-11", "22/12/2009", "98528-3250", 3000+2*i);
@@ -196,10 +204,10 @@ void criar_base_cliente(FILE *out, int tamanho){
 
     desordenar(vetor_cliente, tamanho, (tamanho*10)/100);
 
-    printf("\nGerando a base de dados...\n");
+    printf("\nGerando a base de dados de clientes...\n");
 
     for (int i=0;i<tamanho;i++){
-        cliente = criar_cliente(vetor_cliente[i], "Nome", "000.000.000-11", "22/12/2009");
+        cliente = criar_cliente(vetor_cliente[i], "Nome", "000.000.000-11", "22/12/2009","31985884789");
         salvar_cliente(cliente, out);
     }
 
@@ -215,14 +223,64 @@ void criar_base_transacao(FILE *out, int tamanho, TFuncionario funcionario, TDvd
 
     //O VETOR TRANSAÇÃO NÃO SERÁ DESORDENADO PRA ATENDER AO REQUISITO DE CRIAR UMA BASE DE DADOS ORDENADA
 
-    printf("\nGerando a base de dados...\n");
+    printf("\nGerando a base de dados de transações...\n");
 
     for (int i = 0; i < tamanho; i++) {
         transacao = criar_transacao(vetor_transacao[i], cliente, dvd, funcionario, "22/12/2019", "19/01/2020", 41.7);
-        salvar_cliente(cliente, out);
+        salvar_transacao(transacao, out);
     }
 
     free(transacao);
 
+}
+
+// ***************************** IMPRIME CADA DVD *******************************
+void imprimir_dvd(TDvd *dvd) {
+    printf("**********************************************");
+    printf("\nID DVD: ");
+    printf("%d", dvd->id_dvd);
+    printf("\nTítulo: ");
+    printf("%s", dvd->nome_dvd);
+    printf("\nDiretor: ");
+    printf("%s", dvd->diretor);
+    printf("\nGênero: ");
+    printf("%s", dvd->genero);
+    printf("\nDisponível: ");
+    if(dvd->disponivel == true) {
+        printf("Sim");
+    }else
+        printf("Não");
+    printf("\n**********************************************");
+}
+
+// ***************************** IMPRIME BASE DE DADOS DE DVD *******************************
+void imprimir_base_dvd(FILE *out){
+
+    printf("\Imprimindo base de dados...\n");
+
+    rewind(out);
+    TDvd *dvd;
+
+    while ((dvd = ler_dvd(out)) != NULL)
+        imprimir_dvd(dvd);
+
+    free(dvd);
+
+}
+
+/* Le um dvd do arquivo "in" na posicao atual do cursor e retorna um ponteiro para funcionario lido do arquivo */
+
+TDvd *ler_dvd(FILE *in) {
+    TDvd *dvd = (TDvd *) malloc(sizeof(TDvd));
+    if (0 >= fread(&dvd->id_dvd, sizeof(int), 1, in)) {
+        free(dvd);
+        return NULL;
+    }
+    fread(dvd->nome_dvd, sizeof(char), sizeof(dvd->nome_dvd), in);
+    fread(&dvd->ano_lancamento, sizeof(int), 1, in);
+    fread(dvd->diretor, sizeof(char), sizeof(dvd->diretor), in);
+    fread(dvd->genero, sizeof(char), sizeof(dvd->genero), in);
+    fread(&dvd->disponivel, sizeof(bool), 1, in);
+    return dvd;
 }
 
