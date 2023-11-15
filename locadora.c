@@ -236,7 +236,7 @@ void criar_base_transacao(FILE *out, int tamanho, TFuncionario funcionario, TDvd
 
 // ***************************** IMPRIME CADA DVD *******************************
 void imprimir_dvd(TDvd *dvd) {
-    printf("**********************************************");
+    printf("*******************************");
     printf("\nID DVD: ");
     printf("%d", dvd->id_dvd);
     printf("\nTítulo: ");
@@ -250,13 +250,12 @@ void imprimir_dvd(TDvd *dvd) {
         printf("Sim");
     }else
         printf("Não");
-    printf("\n**********************************************");
+    printf("*******************************");
+
 }
 
 // ***************************** IMPRIME BASE DE DADOS DE DVD *******************************
 void imprimir_base_dvd(FILE *out){
-
-    printf("\Imprimindo base de dados...\n");
 
     rewind(out);
     TDvd *dvd;
@@ -284,3 +283,46 @@ TDvd *ler_dvd(FILE *in) {
     return dvd;
 }
 
+//*************************** BUSCA SEQUENCIAL DVD *************************************
+TDvd *busca_sequencial_dvd(int chave, FILE *in) {
+
+    TDvd *dvd;
+    int achou;
+
+    rewind(in);
+
+    while ((dvd = ler_dvd(in)) != NULL) {
+        if (dvd->id_dvd == chave) {
+            //return f
+            achou = 1;
+            break;
+        }
+    }
+
+    if (achou == 1) {
+        return dvd;
+    } else {
+        printf("\nDVD não encontrado.");
+        return NULL;
+    }
+}
+
+//********************************** EXCLUIR DVD ****************************************
+void excluir_dvd(int chave, FILE *in) {
+    TDvd *dvd;
+    int achou = 0;
+
+    rewind(in);
+
+    while ((dvd = ler_dvd(in)) != NULL) {
+        if (dvd->id_dvd == chave) {
+            achou = 1;
+            free(dvd); // Libere a memória alocada para o DVD encontrado
+            printf("\nDVD excluido com sucesso!");
+            break;
+        }
+    }
+    if(achou == 0)
+        printf("DVD nao encontrado.");
+
+}
